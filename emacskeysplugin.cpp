@@ -1,5 +1,6 @@
 #include "emacskeysplugin.h"
 #include "emacskeysconstants.h"
+#include "emacskeysstate.h"
 
 #include <coreplugin/icore.h>
 #include <coreplugin/editormanager/editormanager.h>
@@ -23,19 +24,9 @@
 
 using namespace EmacsKeys::Internal;
 
-namespace EmacsKeys {
-namespace Internal {
-
-class EmacsKeysState {
-public:
-	EmacsKeysState():
-		m_mark(-1)
-	{}
-
-	int m_mark;
-};
-
-}} // namespace EmacsKeys::Internal
+//---------------------------------------------------------------------------
+// EmacsKeysPlugin
+//---------------------------------------------------------------------------
 
 EmacsKeysPlugin::EmacsKeysPlugin()
 {
@@ -140,7 +131,7 @@ void EmacsKeysPlugin::currentEditorChanged(Core::IEditor *editor)
 		return;
 
 	if (!m_stateMap.contains(m_currentEditorWidget)) {
-		m_stateMap[m_currentEditorWidget] = new EmacsKeysState;
+		m_stateMap[m_currentEditorWidget] = new EmacsKeysState(m_currentEditorWidget);
 	}
 	m_currentState = m_stateMap[m_currentEditorWidget];
 }
@@ -159,14 +150,16 @@ void EmacsKeysPlugin::mark()
 	if (!m_currentEditorWidget)
 		return;
 
+	m_currentState->beginOwnAction();
 	QTextCursor cursor = m_currentEditorWidget->textCursor();
-	if (m_currentState->m_mark == cursor.position()) {
-		m_currentState->m_mark = -1;
+	if (m_currentState->mark() == cursor.position()) {
+		m_currentState->setMark(-1);
 	} else {
 		cursor.clearSelection();
-		m_currentState->m_mark = cursor.position();
+		m_currentState->setMark(cursor.position());
 		m_currentEditorWidget->setTextCursor(cursor);
 	}
+	m_currentState->endOwnAction(EKA_OTHER);
 }
 
 void EmacsKeysPlugin::exchangeCursorAndMark()
@@ -175,15 +168,16 @@ void EmacsKeysPlugin::exchangeCursorAndMark()
 		return;
 
 	QTextCursor cursor = m_currentEditorWidget->textCursor();
-	if (m_currentState->m_mark == -1 || m_currentState->m_mark == cursor.position())
+	if (m_currentState->mark() == -1 || m_currentState->mark() == cursor.position())
 		return;
 
+	m_currentState->beginOwnAction();
 	int position = cursor.position();
 	cursor.clearSelection();
-	cursor.setPosition(m_currentState->m_mark, QTextCursor::KeepAnchor);
-	m_currentState->m_mark = position;
-
+	cursor.setPosition(m_currentState->mark(), QTextCursor::KeepAnchor);
+	m_currentState->setMark(position);
 	m_currentEditorWidget->setTextCursor(cursor);
+	m_currentState->endOwnAction(EKA_OTHER);
 }
 
 void EmacsKeysPlugin::copy()
@@ -191,11 +185,13 @@ void EmacsKeysPlugin::copy()
 	if (!m_currentEditorWidget)
 		return;
 
+	m_currentState->beginOwnAction();
 	QTextCursor cursor = m_currentEditorWidget->textCursor();
 	QApplication::clipboard()->setText(cursor.selectedText());
 	cursor.clearSelection();
 	m_currentEditorWidget->setTextCursor(cursor);
-	m_currentState->m_mark = -1;
+	m_currentState->setMark(-1);
+	m_currentState->endOwnAction(EKA_OTHER);
 }
 
 void EmacsKeysPlugin::cut()
@@ -203,10 +199,12 @@ void EmacsKeysPlugin::cut()
 	if (!m_currentEditorWidget)
 		return;
 
+	m_currentState->beginOwnAction();
 	QTextCursor cursor = m_currentEditorWidget->textCursor();
 	QApplication::clipboard()->setText(cursor.selectedText());
 	cursor.removeSelectedText();
-	m_currentState->m_mark = -1;
+	m_currentState->setMark(-1);
+	m_currentState->endOwnAction(EKA_OTHER);
 }
 
 void EmacsKeysPlugin::yank()
@@ -214,25 +212,36 @@ void EmacsKeysPlugin::yank()
 	if (!m_currentEditorWidget)
 		return;
 
+	m_currentState->beginOwnAction();
 	m_currentEditorWidget->paste();
-	m_currentState->m_mark = -1;
+	m_currentState->setMark(-1);
+	m_currentState->endOwnAction(EKA_OTHER);
 }
 
 void EmacsKeysPlugin::deleteCharacter()
 {
 	if (!m_currentEditorWidget)
 		return;
+	m_currentState->beginOwnAction();
 	m_currentEditorWidget->textCursor().deleteChar();
+	m_currentState->endOwnAction(EKA_OTHER);
 }
 
 void EmacsKeysPlugin::killWord()
 {
 	if (!m_currentEditorWidget)
 		return;
+	m_currentState->beginOwnAction();
 	QTextCursor cursor = m_currentEditorWidget->textCursor();
 	cursor.movePosition(QTextCursor::NextWord, QTextCursor::KeepAnchor);
-	QApplication::clipboard()->setText(cursor.selectedText());
+	if (m_currentState->lastAction() == EKA_KILL_WORD) {
+		QApplication::clipboard()->setText(
+			QApplication::clipboard()->text() + cursor.selectedText());
+	} else {
+		QApplication::clipboard()->setText(cursor.selectedText());
+	}
 	cursor.removeSelectedText();
+	m_currentState->endOwnAction(EKA_KILL_WORD);
 }
 
 void EmacsKeysPlugin::killLine()
@@ -240,6 +249,7 @@ void EmacsKeysPlugin::killLine()
 	if (!m_currentEditorWidget)
 		return;
 
+	m_currentState->beginOwnAction();
 	QTextCursor cursor = m_currentEditorWidget->textCursor();
 	int position = cursor.position();
 	cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
@@ -247,9 +257,14 @@ void EmacsKeysPlugin::killLine()
 		// empty line
 		cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor);
 	}
-
-	QApplication::clipboard()->setText(cursor.selectedText());
+	if (m_currentState->lastAction() == EKA_KILL_LINE) {
+		QApplication::clipboard()->setText(
+			QApplication::clipboard()->text() + cursor.selectedText());
+	} else {
+		QApplication::clipboard()->setText(cursor.selectedText());
+	}
 	cursor.removeSelectedText();
+	m_currentState->endOwnAction(EKA_KILL_LINE);
 }
 
 QAction *EmacsKeysPlugin::registerAction(const Core::Id &id, const char *slot,
@@ -267,9 +282,11 @@ void EmacsKeysPlugin::genericGoto(QTextCursor::MoveOperation op)
 {
 	if (!m_currentEditorWidget)
 		return;
+	m_currentState->beginOwnAction();
 	QTextCursor cursor = m_currentEditorWidget->textCursor();
-	cursor.movePosition(op, m_currentState->m_mark != -1 ? QTextCursor::KeepAnchor : QTextCursor::MoveAnchor);
+	cursor.movePosition(op, m_currentState->mark() != -1 ? QTextCursor::KeepAnchor : QTextCursor::MoveAnchor);
 	m_currentEditorWidget->setTextCursor(cursor);
+	m_currentState->endOwnAction(EKA_OTHER);
 }
 
 Q_EXPORT_PLUGIN2(EmacsKeys, EmacsKeysPlugin)

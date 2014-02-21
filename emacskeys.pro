@@ -2,11 +2,13 @@ DEFINES += EMACSKEYS_LIBRARY
 
 # EmacsKeys files
 
-SOURCES += emacskeysplugin.cpp
+SOURCES += emacskeysplugin.cpp \
+    emacskeysstate.cpp
 
 HEADERS += emacskeysplugin.h \
         emacskeys_global.h \
-        emacskeysconstants.h
+        emacskeysconstants.h \
+    emacskeysstate.h
 
 # Qt Creator linking
 

@@ -36,8 +36,3 @@ Supported actions (copy & paste from the code):
 Notes:
 
  1. No kill ring, copy/cut/yank just uses ordinary Qt clipboard.
- 2. No kill word/line chaining. The first kill adds the contents to the
-    clipboard, the following kills override the contents. Will fix that as soon
-    as I find a proper way to track QPlainTextEdit state.
- 3. Marks do work per editor instance, but for now the selection mode isn't
-    canceled in all cases when it should be. Same problem as in (2).

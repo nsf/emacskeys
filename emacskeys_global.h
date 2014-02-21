@@ -1,0 +1,13 @@
+#ifndef EMACSKEYS_GLOBAL_H
+#define EMACSKEYS_GLOBAL_H
+
+#include <QtGlobal>
+
+#if defined(EMACSKEYS_LIBRARY)
+#  define EMACSKEYSSHARED_EXPORT Q_DECL_EXPORT
+#else
+#  define EMACSKEYSSHARED_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // EMACSKEYS_GLOBAL_H
+

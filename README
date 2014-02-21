@@ -1,0 +1,43 @@
+EmacsKeys.
+
+Build instructions:
+
+TODO, maybe they won't be necessary, I'm willing to work on merging it to the
+mainline.
+
+
+Description:
+
+A very simple QtCreator plugin, it adds a bunch of emacs-oriented actions. You
+can bind appropriate keys manually using the main keyboard shortcuts menu.
+
+Supported actions (copy & paste from the code):
+
+	void deleteCharacter();       // C-d
+	void killWord();              // M-d
+	void killLine();              // C-k
+
+	void gotoLineStart();         // C-a
+	void gotoLineEnd();           // C-e
+	void gotoNextLine();          // C-n
+	void gotoPreviousLine();      // C-p
+	void gotoNextCharacter();     // C-f
+	void gotoPreviousCharacter(); // C-b
+	void gotoNextWord();          // M-f
+	void gotoPreviousWord();      // M-b
+
+	void mark();                  // C-SPC
+	void exchangeCursorAndMark(); // C-x C-x
+	void copy();                  // M-w
+	void cut();                   // C-w
+	void yank();                  // C-y
+
+
+Notes:
+
+ 1. No kill ring, copy/cut/yank just uses ordinary Qt clipboard.
+ 2. No kill word/line chaining. The first kill adds the contents to the
+    clipboard, the following kills override the contents. Will fix that as soon
+    as I find a proper way to track QPlainTextEdit state.
+ 3. Marks do work per editor instance, but for now the selection mode isn't
+    canceled in all cases when it should be. Same problem as in (2).

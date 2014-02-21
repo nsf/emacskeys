@@ -122,7 +122,11 @@ void EmacsKeysPlugin::editorAboutToClose(Core::IEditor *editor)
 	QPlainTextEdit *w = qobject_cast<QPlainTextEdit*>(editor->widget());
 	if (!w)
 		return;
-	m_stateMap.remove(w);
+
+	if (m_stateMap.contains(w)) {
+		delete m_stateMap[w];
+		m_stateMap.remove(w);
+	}
 }
 
 void EmacsKeysPlugin::currentEditorChanged(Core::IEditor *editor)

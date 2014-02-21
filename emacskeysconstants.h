@@ -8,6 +8,8 @@ const char DELETE_CHARACTER[]         = "EmacsKeys.DeleteCharacter";
 const char KILL_WORD[]                = "EmacsKeys.KillWord";
 const char KILL_LINE[]                = "EmacsKeys.KillLine";
 
+const char GOTO_FILE_START[]          = "EmacsKeys.GotoFileStart";
+const char GOTO_FILE_END[]            = "EmacsKeys.GotoFileEnd";
 const char GOTO_LINE_START[]          = "EmacsKeys.GotoLineStart";
 const char GOTO_LINE_END[]            = "EmacsKeys.GotoLineEnd";
 const char GOTO_NEXT_LINE[]           = "EmacsKeys.GotoNextLine";

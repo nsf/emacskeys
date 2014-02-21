@@ -66,6 +66,11 @@ bool EmacsKeysPlugin::initialize(const QStringList &arguments, QString *errorStr
 		SLOT(killWord()), tr("Kill Word"));
 	registerAction(Constants::KILL_LINE,
 		SLOT(killLine()), tr("Kill Line"));
+
+	registerAction(Constants::GOTO_FILE_START,
+		SLOT(gotoFileStart()), tr("Go to File Start"));
+	registerAction(Constants::GOTO_FILE_END,
+		SLOT(gotoFileEnd()), tr("Go to File End"));
 	registerAction(Constants::GOTO_LINE_START,
 		SLOT(gotoLineStart()), tr("Go to Line Start"));
 	registerAction(Constants::GOTO_LINE_END,
@@ -136,6 +141,8 @@ void EmacsKeysPlugin::currentEditorChanged(Core::IEditor *editor)
 	m_currentState = m_stateMap[m_currentEditorWidget];
 }
 
+void EmacsKeysPlugin::gotoFileStart()         { genericGoto(QTextCursor::Start); }
+void EmacsKeysPlugin::gotoFileEnd()           { genericGoto(QTextCursor::End); }
 void EmacsKeysPlugin::gotoLineStart()         { genericGoto(QTextCursor::StartOfLine); }
 void EmacsKeysPlugin::gotoLineEnd()           { genericGoto(QTextCursor::EndOfLine); }
 void EmacsKeysPlugin::gotoNextLine()          { genericGoto(QTextCursor::Down); }

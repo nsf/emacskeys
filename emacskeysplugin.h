@@ -42,6 +42,8 @@ private slots:
 	void killWord();              // M-d
 	void killLine();              // C-k
 
+	void gotoFileStart();         // M-<
+	void gotoFileEnd();           // M->
 	void gotoLineStart();         // C-a
 	void gotoLineEnd();           // C-e
 	void gotoNextLine();          // C-n

@@ -59,10 +59,14 @@ private slots:
 	void cut();                   // C-w
 	void yank();                  // C-y
 
+	void scrollHalfDown();        // C-v
+	void scrollHalfUp();          // M-v
+
 private:
 	QAction *registerAction(const Core::Id &id, const char *slot,
 		const QString &title);
 	void genericGoto(QTextCursor::MoveOperation op);
+	void genericVScroll(int direction);
 
 	QHash<QPlainTextEdit*, EmacsKeysState*> m_stateMap;
 	QPlainTextEdit *m_currentEditorWidget;

@@ -34,7 +34,14 @@ Supported actions (copy & paste from the code):
 	void cut();                   // C-w
 	void yank();                  // C-y
 
+	void scrollHalfDown();        // C-v
+	void scrollHalfUp();          // M-v
 
 Notes:
 
  1. No kill ring, copy/cut/yank just uses ordinary Qt clipboard.
+ 2. Scrolling scrolls half of the screen instead of the full screen as in
+    default emacs. It seems like a better idea. Also unlike default
+    QPlainTextEdit scrolling, this scrolling operations keep cursor within
+    visible area, pulling it down or up as necessary, it's a critical part of
+    keyboard-based navigation.

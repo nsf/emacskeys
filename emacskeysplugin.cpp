@@ -17,6 +17,7 @@
 #include <QPlainTextEdit>
 #include <QApplication>
 #include <QClipboard>
+#include <QScrollBar>
 
 #include <QDebug>
 
@@ -99,6 +100,10 @@ bool EmacsKeysPlugin::initialize(const QStringList &arguments, QString *errorStr
 	registerAction(Constants::YANK,
 		SLOT(yank()), tr("Yank"));
 
+	registerAction(Constants::SCROLL_HALF_DOWN,
+		SLOT(scrollHalfDown()), tr("Scroll Half Screen Down"));
+	registerAction(Constants::SCROLL_HALF_UP,
+		SLOT(scrollHalfUp()), tr("Scroll Half Screen Up"));
 	return true;
 }
 
@@ -229,6 +234,9 @@ void EmacsKeysPlugin::yank()
 	m_currentState->endOwnAction(EKA_OTHER);
 }
 
+void EmacsKeysPlugin::scrollHalfDown() { genericVScroll(1); }
+void EmacsKeysPlugin::scrollHalfUp() { genericVScroll(-1); }
+
 void EmacsKeysPlugin::deleteCharacter()
 {
 	if (!m_currentEditorWidget)
@@ -296,6 +304,40 @@ void EmacsKeysPlugin::genericGoto(QTextCursor::MoveOperation op)
 	m_currentState->beginOwnAction();
 	QTextCursor cursor = m_currentEditorWidget->textCursor();
 	cursor.movePosition(op, m_currentState->mark() != -1 ? QTextCursor::KeepAnchor : QTextCursor::MoveAnchor);
+	m_currentEditorWidget->setTextCursor(cursor);
+	m_currentState->endOwnAction(EKA_OTHER);
+}
+
+void EmacsKeysPlugin::genericVScroll(int direction)
+{
+	if (!m_currentEditorWidget)
+		return;
+
+	m_currentState->beginOwnAction();
+	QScrollBar *verticalScrollBar = m_currentEditorWidget->verticalScrollBar();
+	const int value = verticalScrollBar->value();
+	const int halfPageStep = verticalScrollBar->pageStep() / 2;
+	const int newValue = value + (direction > 0 ? halfPageStep : -halfPageStep);
+	verticalScrollBar->setValue(newValue);
+
+	// adjust cursor if it's out of screen
+	const QRect viewportRect = m_currentEditorWidget->viewport()->rect();
+	const QTextCursor::MoveMode mode =
+		m_currentState->mark() != -1 ?
+		QTextCursor::KeepAnchor :
+		QTextCursor::MoveAnchor ;
+	const QTextCursor::MoveOperation op =
+		m_currentEditorWidget->cursorRect().y() < 0 ?
+		QTextCursor::Down :
+		QTextCursor::Up ;
+
+	QTextCursor cursor = m_currentEditorWidget->textCursor();
+	while (!m_currentEditorWidget->cursorRect(cursor).intersects(viewportRect)) {
+		const int previousPosition = cursor.position();
+		cursor.movePosition(op, mode);
+		if (previousPosition == cursor.position())
+			break;
+	}
 	m_currentEditorWidget->setTextCursor(cursor);
 	m_currentState->endOwnAction(EKA_OTHER);
 }

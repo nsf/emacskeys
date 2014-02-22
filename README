@@ -1,12 +1,42 @@
 EmacsKeys.
 
-Build instructions:
+ --== BUILD INSTRUCTIONS ==--
 
-TODO, maybe they won't be necessary, I'm willing to work on merging it to the
-mainline.
+1. First you need to build the QtCreator itself from the source code. It should
+   be trivial, something like this:
 
+      git clone git://gitorious.org/qt-creator/qt-creator.git
+      mkdir build && cd build
+      qmake ../qt-creator/qtcreator.pro
+      make
 
-Description:
+   At the end you'll have two dirs: 'qt-creator' and 'build'. One contains the
+   source code, the other contains the binaries and libraries.
+
+2. Then you need to build the plugin itself. There is an official guide of some
+   sort here: http://doc.qt.digia.com/qtcreator-extending/first-plugin.html.
+   But it covers more than an average user needs. The main part is that you need
+   to set two environment variables:
+
+    * QTC_SOURCE - points to 'qt-creator' dir from step 1.
+    * QTC_BUILD - points to 'build' dir from step 1.
+
+   And after that invoking qmake and make should be enough to build the
+   plugin. Something like that:
+
+      git clone git://github.com/nsf/emacskeys
+	  mkdir build && cd build
+	  qmake ..
+	  make
+
+   At the end you'll get your plugin installed into the 'build' dir from step 1.
+   It should be somewhere in: 'build/lib/qtcreator/plugins/nsf'.
+
+3. ...
+
+4. PROFIT!
+
+ --== DESCRIPTION ==--
 
 A very simple QtCreator plugin, it adds a bunch of emacs-oriented actions. You
 can bind appropriate keys manually using the main keyboard shortcuts menu.

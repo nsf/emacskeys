@@ -75,3 +75,23 @@ Notes:
     QPlainTextEdit scrolling, this scrolling operations keep cursor within
     visible area, pulling it down or up as necessary, it's a critical part of
     keyboard-based navigation.
+
+ --== TODO ==--
+
+ 1. Closing code assist popup menu when moving left/right (or other movement
+    keys). At the moment it's not an easy thing to do. Code assist code is only
+    aware of a bunch of hardcoded keys and it checks if the cursor moved out of
+    the completion point after one of these keys were pressed. Perhaps it's
+    possible to simply force closing of a popup window by invoking
+    BaseTextEditorWidget's abortAssist slot at the right moment.
+
+ 2. At the moment when you undo kill line, cursor ends up being at the end of
+    the line, perhaps there is a way to record the history in such way that it
+    ends up being in the original location instead.
+
+ 3. Don't know about others, but I use C-j to do the "insert newline"
+    action. The problem with it is that it needs to do automatic indentation. As
+    far as I've seen this functionality exists as a part of the texteditor
+    plugin as part of the BaseTextDocument class. Adding a plugin dependancy is
+    always a question to think about. So far I was managed to stay within
+    QPlainTextEdit range. Seems like it's inevitable though (see item #1).

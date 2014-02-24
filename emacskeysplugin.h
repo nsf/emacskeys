@@ -15,6 +15,9 @@ namespace Core {
 class Id;
 class IEditor;
 }
+namespace TextEditor {
+class BaseTextEditorWidget;
+}
 
 namespace EmacsKeys {
 namespace Internal {
@@ -65,12 +68,13 @@ private slots:
 private:
 	QAction *registerAction(const Core::Id &id, const char *slot,
 		const QString &title);
-	void genericGoto(QTextCursor::MoveOperation op);
+	void genericGoto(QTextCursor::MoveOperation op, bool abortAssist = true);
 	void genericVScroll(int direction);
 
 	QHash<QPlainTextEdit*, EmacsKeysState*> m_stateMap;
 	QPlainTextEdit *m_currentEditorWidget;
 	EmacsKeysState *m_currentState;
+	TextEditor::BaseTextEditorWidget *m_currentBaseTextEditorWidget;
 };
 
 } // namespace Internal

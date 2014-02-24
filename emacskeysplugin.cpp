@@ -7,19 +7,16 @@
 #include <coreplugin/editormanager/ieditor.h>
 #include <coreplugin/icontext.h>
 #include <coreplugin/actionmanager/actionmanager.h>
-#include <coreplugin/actionmanager/command.h>
-#include <coreplugin/actionmanager/actioncontainer.h>
 #include <coreplugin/coreconstants.h>
 #include <utils/qtcassert.h>
 
+#include <texteditor/basetexteditor.h>
+
 #include <QAction>
-#include <QMainWindow>
 #include <QPlainTextEdit>
 #include <QApplication>
 #include <QClipboard>
 #include <QScrollBar>
-
-#include <QDebug>
 
 #include <QtPlugin>
 
@@ -148,14 +145,16 @@ void EmacsKeysPlugin::currentEditorChanged(Core::IEditor *editor)
 		m_stateMap[m_currentEditorWidget] = new EmacsKeysState(m_currentEditorWidget);
 	}
 	m_currentState = m_stateMap[m_currentEditorWidget];
+	m_currentBaseTextEditorWidget =
+		qobject_cast<TextEditor::BaseTextEditorWidget*>(editor->widget());
 }
 
 void EmacsKeysPlugin::gotoFileStart()         { genericGoto(QTextCursor::Start); }
 void EmacsKeysPlugin::gotoFileEnd()           { genericGoto(QTextCursor::End); }
 void EmacsKeysPlugin::gotoLineStart()         { genericGoto(QTextCursor::StartOfLine); }
 void EmacsKeysPlugin::gotoLineEnd()           { genericGoto(QTextCursor::EndOfLine); }
-void EmacsKeysPlugin::gotoNextLine()          { genericGoto(QTextCursor::Down); }
-void EmacsKeysPlugin::gotoPreviousLine()      { genericGoto(QTextCursor::Up); }
+void EmacsKeysPlugin::gotoNextLine()          { genericGoto(QTextCursor::Down, false); }
+void EmacsKeysPlugin::gotoPreviousLine()      { genericGoto(QTextCursor::Up, false); }
 void EmacsKeysPlugin::gotoNextCharacter()     { genericGoto(QTextCursor::Right); }
 void EmacsKeysPlugin::gotoPreviousCharacter() { genericGoto(QTextCursor::Left); }
 void EmacsKeysPlugin::gotoNextWord()          { genericGoto(QTextCursor::NextWord); }
@@ -297,14 +296,17 @@ QAction *EmacsKeysPlugin::registerAction(const Core::Id &id, const char *slot,
 	return result;
 }
 
-void EmacsKeysPlugin::genericGoto(QTextCursor::MoveOperation op)
+void EmacsKeysPlugin::genericGoto(QTextCursor::MoveOperation op, bool abortAssist)
 {
 	if (!m_currentEditorWidget)
 		return;
 	m_currentState->beginOwnAction();
 	QTextCursor cursor = m_currentEditorWidget->textCursor();
-	cursor.movePosition(op, m_currentState->mark() != -1 ? QTextCursor::KeepAnchor : QTextCursor::MoveAnchor);
+	cursor.movePosition(op, m_currentState->mark() != -1 ?
+		QTextCursor::KeepAnchor : QTextCursor::MoveAnchor);
 	m_currentEditorWidget->setTextCursor(cursor);
+	if (abortAssist && m_currentBaseTextEditorWidget != 0)
+		m_currentBaseTextEditorWidget->abortAssist();
 	m_currentState->endOwnAction(EKA_OTHER);
 }
 

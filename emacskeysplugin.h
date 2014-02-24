@@ -44,6 +44,7 @@ private slots:
 	void deleteCharacter();       // C-d
 	void killWord();              // M-d
 	void killLine();              // C-k
+	void insertLineAndIndent();   // C-j
 
 	void gotoFileStart();         // M-<
 	void gotoFileEnd();           // M->

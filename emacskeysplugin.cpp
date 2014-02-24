@@ -64,6 +64,8 @@ bool EmacsKeysPlugin::initialize(const QStringList &arguments, QString *errorStr
 		SLOT(killWord()), tr("Kill Word"));
 	registerAction(Constants::KILL_LINE,
 		SLOT(killLine()), tr("Kill Line"));
+	registerAction(Constants::INSERT_LINE_AND_INDENT,
+		SLOT(insertLineAndIndent()), tr("Insert New Line and Indent"));
 
 	registerAction(Constants::GOTO_FILE_START,
 		SLOT(gotoFileStart()), tr("Go to File Start"));
@@ -283,6 +285,22 @@ void EmacsKeysPlugin::killLine()
 	}
 	cursor.removeSelectedText();
 	m_currentState->endOwnAction(EKA_KILL_LINE);
+}
+
+void EmacsKeysPlugin::insertLineAndIndent()
+{
+	if (!m_currentEditorWidget)
+		return;
+
+	m_currentState->beginOwnAction();
+	QTextCursor cursor = m_currentEditorWidget->textCursor();
+	cursor.beginEditBlock();
+	cursor.insertBlock();
+	if (m_currentBaseTextEditorWidget != 0)
+		m_currentBaseTextEditorWidget->baseTextDocument()->autoIndent(cursor);
+	cursor.endEditBlock();
+	m_currentEditorWidget->setTextCursor(cursor);
+	m_currentState->endOwnAction(EKA_OTHER);
 }
 
 QAction *EmacsKeysPlugin::registerAction(const Core::Id &id, const char *slot,

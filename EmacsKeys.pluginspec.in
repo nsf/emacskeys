@@ -1,9 +1,0 @@
-<plugin name=\"EmacsKeys\" version=\"0.0.1\" compatVersion=\"0.0.1\">
-    <vendor>nsf</vendor>
-	<copyright>(C) nsf &lt;no.smile.face@gmail.com&gt;</copyright>
-    <license>License TODO</license>
-    <description>Description TODO</description>
-    <url>http://nosmileface.ru</url>
-    $$dependencyList
-</plugin>
-
